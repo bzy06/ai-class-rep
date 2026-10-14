@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#efe6d8" />
+  <title>课代表</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='none' stroke='%23b4332a' stroke-width='3'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-size='28' font-family='serif' fill='%23b4332a'%3E课%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="#/">
+      <span class="seal" aria-hidden="true">课</span>
+      <span>课代表</span>
+    </a>
+    <div class="top-actions">
+      <button type="button" class="ghost" data-action="history">历史笔记</button>
+      <button type="button" class="ghost" data-action="settings">模型</button>
+    </div>
+  </header>
+
+  <main id="view-home" class="home">
+    <section class="intro">
+      <p class="kicker">给同学用的听课笔记</p>
+      <h1>把<span class="accent">一节课</span><br />收成一份<br /><span class="mark">能复习的笔记</span></h1>
+      <p class="lede">放进 B 站链接、字幕或你记下的文字稿。整理交给你自己的模型，笔记留在这台电脑上。</p>
+      <div class="fan" aria-label="示例笔记">
+        <button type="button" class="sample" data-go="#/s/inertia">
+          <span class="sample-top"><span class="pill">课堂笔记</span><span class="muted">高中物理</span></span>
+          <strong>力不是维持运动的原因</strong>
+          <span class="open">打开笔记</span>
+        </button>
+        <button type="button" class="sample" data-go="#/s/membrane">
+          <span class="sample-top"><span class="pill">课堂笔记</span><span class="muted">高中生物</span></span>
+          <strong>细胞膜为什么是流动的</strong>
+          <span class="open">打开笔记</span>
+        </button>
+        <button type="button" class="sample" data-go="#/s/linear">
+          <span class="sample-top"><span class="pill">考前复习</span><span class="muted">初中数学</span></span>
+          <strong>一次函数：k 和 b 各管什么</strong>
+          <span class="open">打开笔记</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="整理一节课">
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" id="tab-video" aria-selected="true" aria-controls="panel-video" data-tab="video">视频链接</button>
+        <button type="button" role="tab" id="tab-text" aria-selected="false" aria-controls="panel-text" data-tab="text">文字稿</button>
+        <button type="button" role="tab" id="tab-file" aria-selected="false" aria-controls="panel-file" data-tab="file">字幕文件</button>
+      </div>
+
+      <div id="panel-video" role="tabpanel" aria-labelledby="tab-video">
+        <label class="field">
+          <span>B 站链接或 BV 号</span>
+          <input id="video-input" type="text" placeholder="粘贴链接、分享文案或 BV 号" autocomplete="off" />
+        </label>
+        <p class="hint">有字幕就直接整理。没有字幕、或视频要付费时，把文字稿贴过来就行。</p>
+      </div>
+
+      <div id="panel-text" role="tabpanel" aria-labelledby="tab-text" hidden>
+        <p class="hint">可以直接贴字幕，也可以贴你自己的课堂记录。</p>
+      </div>
+
+      <div id="panel-file" role="tabpanel" aria-labelledby="tab-file" hidden>
+        <label class="drop" id="dropzone">
+          <input id="file-input" type="file" accept=".srt,.vtt,.ass,.txt,.md,text/plain" />
+          <span>把字幕或文本拖到这里，或点击选择</span>
+          <small>支持 SRT、VTT、ASS、TXT</small>
+        </label>
+        <p class="hint" id="file-note">还没有选择文件</p>
+      </div>
+
+      <label class="field" id="course-field" hidden>
+        <span>这节课叫什么</span>
+        <input id="course-title" type="text" placeholder="可留空，模型会自己起标题" autocomplete="off" />
+      </label>
+      <label class="field transcript-field" id="transcript-field" hidden>
+        <span>文字稿 <em id="char-count"></em></span>
+        <textarea id="transcript" rows="8" placeholder="把老师讲的内容、字幕或你的课堂记录贴在这里"></textarea>
+      </label>
+      <p class="hint" id="video-hint" hidden></p>
+
+      <fieldset class="modes">
+        <legend>笔记版本</legend>
+        <label class="choice">
+          <input type="radio" name="mode" value="notes" checked />
+          <span><strong>课堂笔记</strong><small>按讲解顺序写清楚，保留例子和推导。</small></span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="mode" value="brief" />
+          <span><strong>精简速览</strong><small>只留主线、结论和一张能记住的结构。</small></span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="mode" value="review" />
+          <span><strong>考前复习</strong><small>考点、易混的地方，加上可以自测的题。</small></span>
+        </label>
+      </fieldset>
+
+      <p id="form-error" class="error" role="alert" hidden></p>
+      <div id="progress" class="progress" hidden>
+        <ol>
+          <li data-step="0">读取材料</li>
+          <li data-step="1">理解这节课</li>
+          <li data-step="2">写成笔记</li>
+        </ol>
+        <p id="progress-detail">正在准备</p>
+        <button type="button" class="textish" id="cancel">停下来</button>
+      </div>
+      <button type="button" class="primary" id="generate">整理笔记</button>
+      <p class="fine">模型名称、接口和笔记保存在这台电脑上，换一个浏览器也能接着用。</p>
+    </section>
+  </main>
+
+  <main id="view-report" class="report-view" hidden>
+    <div class="report-bar">
+      <a class="ghost" href="#/">返回</a>
+      <div class="top-actions">
+        <button type="button" class="ghost" id="copy-md">复制 Markdown</button>
+        <button type="button" class="ghost" id="download-md">下载</button>
+      </div>
+    </div>
+    <article id="report" class="sheet"></article>
+  </main>
+
+  <dialog id="settings">
+    <form id="settings-form" method="dialog">
+      <div class="dialog-head">
+        <h2>你的模型</h2>
+        <button type="button" class="icon" data-action="close" aria-label="关闭">×</button>
+      </div>
+      <p class="help">兼容 OpenAI 的 Chat Completions。地址填到 <code>/v1</code>，例如 <code>https://api.deepseek.com/v1</code>，或本机的 <code>http://127.0.0.1:11434/v1</code>。密钥不会写进笔记。</p>
+      <label class="field">
+        <span>接口地址</span>
+        <input id="base-url" type="url" placeholder="https://api.openai.com/v1" autocomplete="off" spellcheck="false" />
+      </label>
+      <label class="field">
+        <span>API Key</span>
+        <input id="api-key" type="password" placeholder="本机模型可以留空" autocomplete="off" spellcheck="false" />
+      </label>
+      <label class="field">
+        <span>模型名</span>
+        <input id="model" type="text" placeholder="例如 deepseek-chat、qwen-plus、gpt-4.1-mini" autocomplete="off" spellcheck="false" />
+      </label>
+      <label class="temp">
+        <span>温度 <output id="temperature-out">0.4</output></span>
+        <input id="temperature" type="range" min="0" max="1" step="0.1" value="0.4" />
+      </label>
+      <label class="check">
+        <input id="send-temperature" type="checkbox" checked />
+        <span>附带 temperature。推理模型如果不接受，就关掉。</span>
+      </label>
+      <p id="settings-hint" class="hint"></p>
+      <div class="dialog-actions">
+        <button type="button" class="ghost" id="test-model">测试连接</button>
+        <button type="submit" class="primary slim">保存</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="history">
+    <div class="dialog-head">
+      <h2>历史笔记</h2>
+      <button type="button" class="icon" data-action="close" aria-label="关闭">×</button>
+    </div>
+    <label class="field">
+      <span class="sr">搜索</span>
+      <input id="history-search" type="search" placeholder="搜索标题" />
+    </label>
+    <div id="history-list" class="history-list"></div>
+    <button type="button" class="textish" id="clear-history">清空</button>
+  </dialog>
+
+  <div id="toast" role="status"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
